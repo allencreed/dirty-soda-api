@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model MenuItem {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  basePrice   Float
+  image       String?
+  category    String
+  isActive    Boolean   @default(true)
+  modifiers   Modifier[]
+  cartItems   CartItem[]
+  createdAt   DateTime  @default(now())
+}
+
+model Modifier {
+  id          String    @id @default(cuid())
+  name        String
+  priceDelta  Float
+  menuItemId  String
+  menuItem    MenuItem  @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+}
+
+model CartItem {
+  id          String   @id @default(cuid())
+  clerkUserId String
+  menuItemId  String
+  name        String
+  description String?
+  basePrice   Float
+  image       String?
+  category    String
+  isActive    Boolean  @default(true)
+  modifiers   String   @default("[]")
+  quantity    Int      @default(1)
+  menuItem    MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+}
+
+model Order {
+  id                    String   @id @default(cuid())
+  clerkUserId           String
+  total                 Float
+  items                 String
+  status                String   @default("pending")
+  stripePaymentIntentId String?
+  createdAt             DateTime @default(now())
+}
